@@ -1,5 +1,9 @@
 package com.devconnection.ProjectService;
 
+import com.devconnection.ProjectService.domain.Profile;
+import com.devconnection.ProjectService.messages.CreateProfileMessage;
+import com.devconnection.ProjectService.repositories.ProfileRepository;
+import com.devconnection.ProjectService.services.ProfileServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -7,8 +11,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.sun.javaws.JnlpxArgs.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProfileServiceTest {
@@ -26,7 +30,7 @@ public class ProfileServiceTest {
         CreateProfileMessage createProfileMessage = new CreateProfileMessage(emailId);
         profileService.createProfile(createProfileMessage);
 
-        verify(profileRepository,times(1)).insert(Mockito.any(createProfileMessage));
+        verify(profileRepository,times(1)).insert(Mockito.any((Profile.class)));
     }
 
 }
