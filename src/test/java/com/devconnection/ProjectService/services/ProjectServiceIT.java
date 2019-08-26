@@ -1,5 +1,6 @@
-package com.devconnection.ProjectService;
+package com.devconnection.ProjectService.services;
 
+import com.devconnection.ProjectService.ProjectServiceApplication;
 import com.devconnection.ProjectService.domain.Position;
 import com.devconnection.ProjectService.domain.Project;
 import com.devconnection.ProjectService.messages.*;
