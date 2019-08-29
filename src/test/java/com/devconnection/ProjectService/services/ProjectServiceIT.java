@@ -5,12 +5,15 @@ import com.devconnection.ProjectService.domain.Position;
 import com.devconnection.ProjectService.domain.Project;
 import com.devconnection.ProjectService.messages.*;
 import com.devconnection.ProjectService.repositories.ProjectRepository;
-import com.devconnection.ProjectService.services.ProjectService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @SpringBootTest(classes = {ProjectServiceApplication.class})
 public class ProjectServiceIT {
 
@@ -57,9 +61,9 @@ public class ProjectServiceIT {
 
         projectRepository.insert(Arrays.asList(project1, project2));
 
-        GenericMessage genericMessage = new GenericMessage("Dave");
+        GenericMessage message = new GenericMessage("Dave");
 
-        GetProjectsResponse getProjectsResponse = projectService.getProjects(genericMessage);
+        GetProjectsResponse getProjectsResponse = projectService.getProjects(message);
 
         assertEquals(2, getProjectsResponse.getProjects().size());
     }

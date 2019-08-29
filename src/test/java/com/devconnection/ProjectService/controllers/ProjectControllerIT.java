@@ -1,11 +1,13 @@
 package com.devconnection.ProjectService.controllers;
 
-import com.devconnection.ProjectService.ProjectServiceApplication;
-import com.devconnection.ProjectService.domain.Position;
-import com.devconnection.ProjectService.domain.Project;
-import com.devconnection.ProjectService.messages.*;
-import com.devconnection.ProjectService.repositories.ProjectRepository;
-import com.devconnection.ProjectService.services.ProjectService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,15 +17,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import com.devconnection.ProjectService.ProjectServiceApplication;
+import com.devconnection.ProjectService.domain.Position;
+import com.devconnection.ProjectService.domain.Project;
+import com.devconnection.ProjectService.messages.DeleteProjectMessage;
+import com.devconnection.ProjectService.messages.GenericMessage;
+import com.devconnection.ProjectService.messages.GenericResponse;
+import com.devconnection.ProjectService.messages.GetProjectMessage;
+import com.devconnection.ProjectService.messages.GetProjectResponse;
+import com.devconnection.ProjectService.messages.GetProjectsResponse;
+import com.devconnection.ProjectService.messages.UpdateProjectDescriptionMessage;
+import com.devconnection.ProjectService.messages.UpdateProjectPositionAddMessage;
+import com.devconnection.ProjectService.messages.UpdateProjectPositionMessage;
+import com.devconnection.ProjectService.repositories.ProjectRepository;
 
 @RunWith(SpringRunner.class)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @SpringBootTest(classes = {ProjectServiceApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProjectControllerIT {
 
@@ -32,9 +45,6 @@ public class ProjectControllerIT {
 
     @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
-    private ProjectService projectService;
 
     @LocalServerPort
     private int port;
@@ -51,8 +61,7 @@ public class ProjectControllerIT {
 
     @Before
     public void init() {
-        System.out.println("before been called");
-        baseUrl = String.format("http://localhost:%d/project-service/", port);
+        baseUrl = String.format("http://localhost:%d/", port);
         List<Position> positions = new ArrayList<>();
         position1 = new Position("Java Developer", "", false);
         position2 = new Position("React", "", false);
@@ -70,7 +79,7 @@ public class ProjectControllerIT {
     @Test
     public void createProject() {
         projectRepository.deleteAll();
-        ResponseEntity<String> response = restTemplate.postForEntity(baseUrl+"create", project, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(baseUrl + "create", project, String.class);
 
         assertEquals(200, response.getStatusCodeValue());
         assertTrue(projectRepository.existsById(projectTitle));
@@ -81,7 +90,7 @@ public class ProjectControllerIT {
         GetProjectMessage getProjectMessage = new GetProjectMessage();
         getProjectMessage.setTitle(projectTitle);
 
-        ResponseEntity<GetProjectResponse> response = restTemplate.postForEntity(baseUrl+"get/single", getProjectMessage, GetProjectResponse.class);
+        ResponseEntity<GetProjectResponse> response = restTemplate.postForEntity(baseUrl + "get/single", getProjectMessage, GetProjectResponse.class);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(project, response.getBody().getProject());
@@ -92,10 +101,10 @@ public class ProjectControllerIT {
         Project newProject = new Project("Elder Scrolls", "Rachel@live.co.uk", "Cool project", Arrays.asList());
         projectRepository.insert(newProject);
 
-        GenericMessage genericMessage = new GenericMessage();
-        genericMessage.setEmail(newProject.getOwner());
+        GenericMessage message = new GenericMessage();
+        message.setEmail(newProject.getOwner());
 
-        ResponseEntity<GetProjectsResponse> response = restTemplate.postForEntity(baseUrl+"get/multiple", genericMessage, GetProjectsResponse.class);
+        ResponseEntity<GetProjectsResponse> response = restTemplate.postForEntity(baseUrl + "get/multiple", message, GetProjectsResponse.class);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(2, response.getBody().getProjects().size());
@@ -109,7 +118,7 @@ public class ProjectControllerIT {
         message.setEmail(project.getOwner());
         message.setDescription("No No");
 
-        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl+"update/description", message, GenericResponse.class);
+        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl + "update/description", message, GenericResponse.class);
 
         assertEquals(200, response.getStatusCodeValue());
         assertTrue(response.getBody().isSuccess());
@@ -129,7 +138,7 @@ public class ProjectControllerIT {
         message.setPosition(position);
         message.setIndex(1);
 
-        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl+"update/position/modify", message, GenericResponse.class);
+        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl + "update/position/modify", message, GenericResponse.class);
 
         assertEquals(200, response.getStatusCodeValue());
         assertTrue(response.getBody().isSuccess());
@@ -148,7 +157,7 @@ public class ProjectControllerIT {
         message.setPosition(position);
         message.setIndex(1);
 
-        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl+"update/position/remove", message, GenericResponse.class);
+        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl + "update/position/remove", message, GenericResponse.class);
 
         assertEquals(200, response.getStatusCodeValue());
         assertTrue(response.getBody().isSuccess());
@@ -166,7 +175,7 @@ public class ProjectControllerIT {
         message.setEmail(project.getOwner());
         message.setPosition(position);
 
-        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl+"update/position/add", message, GenericResponse.class);
+        ResponseEntity<GenericResponse> response = restTemplate.postForEntity(baseUrl + "update/position/add", message, GenericResponse.class);
 
         assertEquals(200, response.getStatusCodeValue());
         assertTrue(response.getBody().isSuccess());
@@ -180,8 +189,8 @@ public class ProjectControllerIT {
         message.setProjectTitle(projectTitle);
         message.setEmail(project.getOwner());
 
-        restTemplate.postForEntity(baseUrl+"delete", message, String.class);
+        restTemplate.postForEntity(baseUrl + "delete", message, String.class);
 
-        assertFalse( projectRepository.existsById(projectTitle));
+        assertFalse(projectRepository.existsById(projectTitle));
     }
 }
