@@ -7,7 +7,7 @@ public interface ProjectService {
 
     void createProject(Project project);
 
-    GetProjectsResponse getProjects(GenericMessage genericMessage);
+    GetProjectsResponse getProjects(GenericMessage message);
 
     GetProjectResponse getProject(GetProjectMessage getProjectMessage);
 

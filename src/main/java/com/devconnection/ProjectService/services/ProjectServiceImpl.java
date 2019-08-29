@@ -33,9 +33,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public GetProjectsResponse getProjects(GenericMessage genericMessage) {
+    public GetProjectsResponse getProjects(GenericMessage message) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("owner").is(genericMessage.getEmail()));
+        query.addCriteria(Criteria.where("owner").is(message.getEmail()));
 
         List<Project> projects = mongoTemplate.find(query, Project.class);
 
